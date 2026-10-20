@@ -15,7 +15,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -346,7 +346,7 @@ public class TestSuite {
     }
 
     private static int status(String url) throws Exception {
-        HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
+        HttpURLConnection c = (HttpURLConnection) URI.create(url).toURL().openConnection();
         return c.getResponseCode();
     }
 
@@ -356,7 +356,7 @@ public class TestSuite {
     }
 
     private static HttpURLConnection open(String method, String url, String body) throws Exception {
-        HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
+        HttpURLConnection c = (HttpURLConnection) URI.create(url).toURL().openConnection();
         c.setRequestMethod(method);
         if (body != null) {
             c.setDoOutput(true);
