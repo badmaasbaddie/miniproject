@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Password Security Suite</title>
+  <meta name="description" content="Analyze passwords, generate secure ones, and explore attacks and defenses through safe local simulations.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%234f46e5' d='M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3z'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+  <!-- ============================== Sidebar ============================== -->
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="#home">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.7 8 11 4.6-1.3 8-6 8-11V5l-8-3z"/><path class="tick" d="m8.5 12 2.5 2.5 4.5-5"/></svg>
+      <span>Password<br>Security Suite</span>
+    </a>
+    <nav class="nav" aria-label="Modules">
+      <a href="#home" data-route="home"><span class="num">⌂</span>Home</a>
+      <div class="nav-group">Analyze &amp; create</div>
+      <a href="#analyzer" data-route="analyzer"><span class="num">1</span>Strength Analyzer</a>
+      <a href="#generator" data-route="generator"><span class="num">2</span>Password Generator</a>
+      <a href="#estimator" data-route="estimator"><span class="num">9</span>Crack-Time Estimator</a>
+      <div class="nav-group">Attack simulations</div>
+      <a href="#bruteforce" data-route="bruteforce"><span class="num">3</span>Brute Force</a>
+      <a href="#dictionary" data-route="dictionary"><span class="num">4</span>Dictionary Attack</a>
+      <a href="#hashmatch" data-route="hashmatch"><span class="num">6</span>Hash Matching</a>
+      <div class="nav-group">Defenses</div>
+      <a href="#hashing" data-route="hashing"><span class="num">5</span>Hashing Lab</a>
+      <a href="#login" data-route="login"><span class="num">7</span>Login Security</a>
+      <div class="nav-group">Insights</div>
+      <a href="#analytics" data-route="analytics"><span class="num">8</span>Reports &amp; Analytics</a>
+    </nav>
+    <div class="sidebar-foot">
+      <button class="theme-toggle side" type="button" data-theme-toggle>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+        <span>Toggle dark mode</span>
+      </button>
+      <p>Runs locally. Passwords are never stored.</p>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn menu-btn" id="menuBtn" aria-label="Open menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div class="topbar-title" id="topbarTitle">Home</div>
+      <button class="icon-btn" type="button" data-theme-toggle aria-label="Toggle dark mode" title="Toggle dark mode">
+        <svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </header>
+
+    <main class="content" id="content">
+
+      <!-- ============================== Home ============================== -->
+      <section class="page" id="page-home" data-title="Home">
+        <div class="hero">
+          <p class="eyebrow">Educational security lab</p>
+          <h1>See how passwords get cracked, and how to stop it.</h1>
+          <p class="lede">Analyze strength, generate strong passwords, and run safe, local simulations of brute-force, dictionary and hash-matching attacks. Nothing leaves your computer.</p>
+          <div class="hero-actions">
+            <a class="btn primary" href="#analyzer">Analyze a password</a>
+            <a class="btn" href="#generator">Generate one</a>
+          </div>
+        </div>
+        <div class="stat-strip" id="homeStats"></div>
+        <div class="module-grid">
+          <a class="module-card" href="#analyzer"><span class="tag">1</span><h3>Strength Analyzer</h3><p>Score, entropy, character variety and weak-pattern detection.</p></a>
+          <a class="module-card" href="#generator"><span class="tag">2</span><h3>Password Generator</h3><p>Cryptographically random passwords and memorable passphrases.</p></a>
+          <a class="module-card" href="#bruteforce"><span class="tag">3</span><h3>Brute Force Simulator</h3><p>Watch how length and character sets change guessing effort.</p></a>
+          <a class="module-card" href="#dictionary"><span class="tag">4</span><h3>Dictionary Attack</h3><p>Test sample passwords against a local wordlist.</p></a>
+          <a class="module-card" href="#hashing"><span class="tag">5</span><h3>Hashing Lab</h3><p>SHA-256, determinism, the avalanche effect and salting.</p></a>
+          <a class="module-card" href="#hashmatch"><span class="tag">6</span><h3>Hash Matching</h3><p>How attackers match leaked hashes by guessing forward.</p></a>
+          <a class="module-card" href="#login"><span class="tag">7</span><h3>Login Security</h3><p>Salted PBKDF2, failed-attempt tracking, lockout and cooldown.</p></a>
+          <a class="module-card" href="#analytics"><span class="tag">8</span><h3>Reports &amp; Analytics</h3><p>Session statistics, charts and an exportable report.</p></a>
+          <a class="module-card" href="#estimator"><span class="tag">9</span><h3>Crack-Time Estimator</h3><p>Compare search spaces and cracking times at five speeds.</p></a>
+        </div>
+      </section>
+
+      <!-- ============================== 1. Analyzer ============================== -->
+      <section class="page" id="page-analyzer" data-title="Strength Analyzer" hidden>
+        <div class="page-head">
+          <p class="eyebrow">Module 1</p>
+          <h1>Password Strength Analyzer</h1>
+          <p class="lede">Checks length, character diversity, weak patterns, score and entropy. Results update as you type; <strong>Analyze &amp; record</strong> adds the score (never the password) to your session report.</p>
+        </div>
+        <div class="card">
+          <label class="label" for="anPassword">Password to analyze</label>
+          <div class="input-row">
+            <div class="pw-field">
+              <input id="anPassword" type="password" autocomplete="off" spellcheck="false" placeholder="Type a password…">
+              <button class="pw-toggle" type="button" data-toggle="anPassword" aria-label="Show password">Show</button>
+            </div>
+            <button class="btn primary" id="anRecord">Analyze &amp; record</button>
+            <button class="btn ghost" id="anClear">Clear</button>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="score-wrap">
+              <div class="gauge" id="anGauge" style="--val:0">
+                <div class="gauge-inner"><span id="anScore">0</span><small>/ 100</small></div>
+              </div>
+              <div class="score-meta">
+                <span class="badge" id="anBadge">Awaiting input</span>
+                <dl class="kv">
+                  <dt>Entropy</dt><dd id="anEntropy">0.0 bits</dd>
+                  <dt>Pool size</dt><dd id="anPool">0 chars</dd>
+                  <dt>Crack time <span class="hint" title="Full search at 10 billion guesses per second (fast GPU, unsalted hash)">ⓘ</span></dt><dd id="anCrack">Instant</dd>
+                </dl>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <h2 class="card-title">Character checklist</h2>
+            <ul class="checklist" id="anChecklist"></ul>
+          </div>
+        </div>
+        <div class="card" id="anWarningsCard">
+          <h2 class="card-title">Pattern check</h2>
+          <div id="anWarnings" class="muted">Enter a password to inspect it for weak patterns.</div>
+        </div>
+      </section>
+
+      <!-- ============================== 2. Generator ============================== -->
+      <section class="page" id="page-generator" data-title="Password Generator" hidden>
+        <div class="page-head">
+          <p class="eyebrow">Module 2</p>
+          <h1>Secure Password Generator</h1>
+          <p class="lede">Uses <code>java.security.SecureRandom</code>, a cryptographically secure random generator, unlike predictable <code>Math.random()</code>.</p>
+        </div>
+        <div class="card output-card">
+          <div class="output" id="genOutput" aria-live="polite">Click Generate</div>
+          <div class="output-actions">
+            <button class="btn" id="genCopy" disabled>Copy</button>
+            <button class="btn ghost" id="genAnalyze" disabled>Analyze it</button>
+          </div>
+          <p class="small muted" id="genInfo">&nbsp;</p>
+        </div>
+        <div class="tabs" role="tablist">
+          <button class="tab active" role="tab" data-tab="gen-pw" aria-selected="true">Random password</button>
+          <button class="tab" role="tab" data-tab="gen-pp" aria-selected="false">Memorable passphrase</button>
+        </div>
+        <div class="card tab-panel" id="gen-pw">
+          <label class="label" for="genLength">Length: <strong id="genLengthVal">16</strong> characters</label>
+          <input type="range" id="genLength" min="6" max="64" value="16">
+          <div class="checks">
+            <label class="check"><input type="checkbox" id="genUpper" checked> Uppercase (A–Z)</label>
+            <label class="check"><input type="checkbox" id="genLower" checked> Lowercase (a–z)</label>
+            <label class="check"><input type="checkbox" id="genDigits" checked> Digits (0–9)</label>
+            <label class="check"><input type="checkbox" id="genSymbols" checked> Symbols (!@#…)</label>
+            <label class="check"><input type="checkbox" id="genAmbig"> Exclude look-alikes (0 O l I 1)</label>
+          </div>
+          <button class="btn primary" id="genPwBtn">Generate password</button>
+        </div>
+        <div class="card tab-panel" id="gen-pp" hidden>
+          <div class="form-grid">
+            <div>
+              <label class="label" for="ppWords">Number of words</label>
+              <input type="number" id="ppWords" min="3" max="8" value="4">
+            </div>
+            <div>
+              <label class="label" for="ppSep">Separator</label>
+              <select id="ppSep">
+                <option value="-">Hyphen (-)</option>
+                <option value=" ">Space</option>
+                <option value=".">Period (.)</option>
+                <option value="_">Underscore (_)</option>
+                <option value="">None</option>
+              </select>
+            </div>
+          </div>
+          <div class="checks">
+            <label class="check"><input type="checkbox" id="ppCap" checked> Capitalize words</label>
+            <label class="check"><input type="checkbox" id="ppNum" checked> Append a number</label>
+          </div>
+          <button class="btn primary" id="genPpBtn">Generate passphrase</button>
+          <p class="small muted">This demo uses a small 54-word vocabulary, so each word adds only about 5.8 bits. Real passphrase generators use lists like the EFF's 7,776 words (about 12.9 bits per word), where 6 words reach about 77 bits.</p>
+        </div>
+      </section>
+
+      <!-- ============================== 3. Brute force ============================== -->
+      <section class="page" id="page-bruteforce" data-title="Brute Force" hidden>
+        <div class="page-head">
+          <p class="eyebrow">Module 3</p>
+          <h1>Brute Force Simulator</h1>
+          <p class="lede">Tries every combination of the target's length, in order, against a sample string you type. Short targets fall in milliseconds; each extra character multiplies the work.</p>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h2 class="card-title">Setup</h2>
+            <label class="label" for="bfPreset">Quick preset</label>
+            <select id="bfPreset">
+              <option value="">Custom…</option>
+              <option value="429|d">3 digits: 429</option>
+              <option value="cat|l">3 lowercase: cat</option>
+              <option value="A9z|dlu">3 alphanumeric: A9z</option>
+              <option value="code|l">4 lowercase: code</option>
+            </select>
+            <label class="label" for="bfTarget">Target string</label>
+            <input id="bfTarget" type="text" value="cat" autocomplete="off" spellcheck="false" maxlength="12">
+            <div class="checks">
+              <label class="check"><input type="checkbox" id="bfDigits"> Digits</label>
+              <label class="check"><input type="checkbox" id="bfLower" checked> Lowercase</label>
+              <label class="check"><input type="checkbox" id="bfUpper"> Uppercase</label>
+              <label class="check"><input type="checkbox" id="bfSymbols"> Symbols (!@#$%^&amp;*)</label>
+            </div>
+            <dl class="kv compact">
+              <dt>Pool size (R)</dt><dd id="bfPool">26</dd>
+              <dt>Combinations (R<sup>L</sup>)</dt><dd id="bfCombos">17,576</dd>
+              <dt>Full search at 10M/s</dt><dd id="bfEst">—</dd>
+            </dl>
+          </div>
+          <div class="card monitor">
+            <h2 class="card-title">Attack monitor</h2>
+            <div class="candidate" id="bfCandidate">—</div>
+            <div class="progress"><div id="bfBar"></div></div>
+            <div class="metrics">
+              <div><span class="metric-label">Attempts</span><span class="metric" id="bfAttempts">0</span></div>
+              <div><span class="metric-label">Time (server)</span><span class="metric" id="bfElapsed">0 ms</span></div>
+              <div><span class="metric-label">Status</span><span class="metric" id="bfStatus">Ready</span></div>
+            </div>
+            <div class="btn-row">
+              <button class="btn primary" id="bfRun">Run simulation</button>
+              <button class="btn danger" id="bfStop" disabled>Stop</button>
+              <button class="btn ghost" id="bfReset">Reset</button>
+            </div>
+            <p class="small muted">Capped at 500,000 attempts (50,000 for targets over 4 characters) to keep the demo quick.</p>
+          </div>
+        </div>
+        <div class="card info">
+          <h2 class="card-title">Why length wins</h2>
+          <p>The search space is <strong>R<sup>L</sup></strong>: pool size to the power of length. Adding one character multiplies the work by R, while adding a character set only grows R. A 4-digit PIN has 10,000 combinations; 12 mixed characters have about 5 × 10<sup>23</sup>.</p>
+        </div>
+      </section>
+
+      <!-- ============================== 4. Dictionary ============================== -->
+      <section class="page" id="page-dictionary" data-title="Dictionary Attack" hidden>
+        <div class="page-head">
+          <p class="eyebrow">Module 4</p>
+          <h1>Dictionary Attack Simulator</h1>
+          <p class="lede">Checks a sample password against a local wordlist (<code>data/sample_words.txt</code>). Common words fall instantly no matter how long they are.</p>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title-row">
+              <h2 class="card-title">Wordlist <span class="pill" id="dictCount">0</span></h2>
+              <button class="btn ghost sm" id="dictRestore">Restore</button>
+            </div>
+            <div class="wordlist" id="dictList" role="list"></div>
+            <form class="input-row" id="dictAddForm">
+              <input id="dictNewWord" type="text" placeholder="Add a word…" autocomplete="off" maxlength="64">
+              <button class="btn" type="submit">Add</button>
+            </form>
+            <p class="small muted">Click a word to use it as the target.</p>
+          </div>
+          <div class="card monitor">
+            <h2 class="card-title">Target</h2>
+            <label class="label" for="dictPreset">Quick target</label>
+            <select id="dictPreset">
+              <option value="dragon">In wordlist: dragon</option>
+              <option value="matrix">In wordlist: matrix</option>
+              <option value="letmein">In wordlist: letmein</option>
+              <option value="Titan$#2026!X">Not in wordlist: Titan$#2026!X</option>
+            </select>
+            <label class="label" for="dictTarget">Target string</label>
+            <input id="dictTarget" type="text" value="dragon" autocomplete="off" spellcheck="false">
+            <label class="label" for="dictSpeed">Speed</label>
+            <select id="dictSpeed">
+              <option value="60">Animated (60 ms per word)</option>
+              <option value="10">Fast (10 ms per word)</option>
+              <option value="0">Instant</option>
+            </select>
+            <div class="candidate" id="dictCandidate">—</div>
+            <div class="progress"><div id="dictBar"></div></div>
+            <div class="metrics">
+              <div><span class="metric-label">Attempt</span><span class="metric" id="dictAttempt">0 / 0</span></div>
+              <div><span class="metric-label">Status</span><span class="metric" id="dictStatus">Ready</span></div>
+            </div>
+            <div class="btn-row">
+              <button class="btn primary" id="dictRun">Run attack</button>
+              <button class="btn danger" id="dictStop" disabled>Stop</button>
+              <button class="btn ghost" id="dictReset">Reset</button>
+            </div>
+          </div>
+        </div>
+        <div class="card info">
+          <h2 class="card-title">Why dictionary attacks work, and how to defend</h2>
+          <ul>
+            <li><strong>People pick memorable words.</strong> Real leaked lists like RockYou hold 14 million passwords from actual breaches.</li>
+            <li><strong>Rules make it worse.</strong> Attackers try variations such as <code>dragon</code> → <code>Dr@g0n2024!</code>, so simple substitutions don't help much.</li>
+            <li><strong>Defenses:</strong> rate limiting and lockout, slow salted hashing (Argon2id, bcrypt, PBKDF2), and multi-factor authentication.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ============================== 5. Hashing lab ============================== -->
+      <section class="page" id="page-hashing" data-title="Hashing Lab" hidden>
+        <div class="page-head">
+          <p class="eyebrow">Module 5</p>
+          <h1>Password Hashing Lab</h1>
+          <p class="lede">SHA-256 turns any input into a fixed 64-character fingerprint. See that it's deterministic, that tiny changes scramble it, and why salt matters.</p>
+        </div>
+        <div class="card">
+          <label class="label" for="hashInput">Input text</label>
+          <div class="input-row">
+            <input id="hashInput" type="text" value="HelloWorld" autocomplete="off" spellcheck="false">
+            <button class="btn primary" id="hashBtn">Compute SHA-256</button>
+          </div>
+          <div class="hash-out" id="hashOut" aria-live="polite">—</div>
+        </div>
+        <div class="demo-buttons">
+          <button class="demo-btn" data-demo="determinism"><strong>1. Determinism</strong><span>Same input, same hash, every time</span></button>
+          <button class="demo-btn" data-demo="avalanche"><strong>2. Avalanche effect</strong><span>One character flips about half the bits</span></button>
+          <button class="demo-btn" data-demo="salt"><strong>3. Salting</strong><span>Same password, different stored hashes</span></button>
+        </div>
+        <div class="card" id="hashDemoOut" hidden></div>
+        <div class="card info">
+          <h2 class="card-title">SHA-256 alone is not enough for passwords</h2>
+          <ul>
+            <li><strong>It's built to be fast.</strong> A modern GPU computes over 10 billion SHA-256 hashes per second, great for file integrity, bad for passwords.</li>
+            <li><strong>Unsalted hashes leak.</strong> Identical passwords give identical hashes, so precomputed rainbow tables crack them in bulk.</li>
+            <li><strong>Use a password KDF.</strong> Argon2id, bcrypt or PBKDF2 with a unique salt and a high cost factor.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ============================== 6. Hash matching ============================== -->
+      <section class="page" id="page-hashmatch" data-title="Hash Matching" hidden>
+        <div class="page-head">
+          <p class="eyebrow">Module 6</p>
+          <h1>Hash Matching Demo</h1>
+          <p class="lede">Hashes can't be reversed, but they can be <em>guessed</em>: hash each candidate word and compare. If one matches the leaked hash, the password is revealed.</p>
+        </div>
+        <div class="card">
+          <label class="label" for="hmPreset">Leaked sample hash</label>
+          <select id="hmPreset"></select>
+          <label class="label" for="hmTarget">Target SHA-256 hash</label>
+          <input id="hmTarget" type="text" class="mono" autocomplete="off" spellcheck="false" maxlength="64">
+          <div class="btn-row">
+            <button class="btn primary" id="hmRun">Start matching</button>
+            <button class="btn danger" id="hmStop" disabled>Stop</button>
+            <button class="btn ghost" id="hmReset">Reset</button>
+          </div>
+        </div>
+        <div class="card monitor">
+          <div class="card-title-row">
+            <h2 class="card-title">Matching monitor</h2>
+            <span class="pill" id="hmCount">0 / 0</span>
+          </div>
+          <div class="compare">
+            <div><span class="metric-label">Candidate word</span><div class="candidate" id="hmWord">—</div></div>
+            <div><span class="metric-label">SHA-256(candidate)</span><div class="hash-out" id="hmHash">—</div></div>
+            <div><span class="metric-label">Target hash</span><div class="hash-out" id="hmTargetEcho">—</div></div>
+          </div>
+          <div class="progress"><div id="hmBar"></div></div>
+          <div class="status-banner" id="hmStatus">Ready</div>
+        </div>
+        <div class="card info">
+          <h2 class="card-title">What just happened</h2>
+          <p>The tool took a candidate like <code>password</code>, computed <code>SHA-256("password")</code>, and compared it with the target. When the two strings are equal, the plaintext is known. Nothing was decrypted. That's why a password found in any wordlist is unsafe even when it's hashed.</p>
+        </div>
+      </section>
+
+      <!-- ============================== 7. Login ============================== -->
+      <section class="page" id="page-login" data-title="Login Security" hidden>
+        <div class="page-head">
+          <p class="eyebrow">Module 7</p>
+          <h1>Login Security Demo</h1>
+          <p class="lede">Passwords are checked against salted PBKDF2 hashes. Three wrong guesses lock the account for a 15-second cooldown.</p>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h2 class="card-title">Sign in to a demo account</h2>
+            <form id="loginForm" autocomplete="off">
+              <label class="label" for="loginUser">Username</label>
+              <select id="loginUser"></select>
+              <label class="label" for="loginPass">Password</label>
+              <div class="pw-field">
+                <input id="loginPass" type="password" autocomplete="off" spellcheck="false">
+                <button class="pw-toggle" type="button" data-toggle="loginPass" aria-label="Show password">Show</button>
+              </div>
+              <div class="btn-row">
+                <button class="btn primary" type="submit" id="loginBtn">Sign in</button>
+                <button class="btn ghost" type="button" id="loginReset">Emergency reset</button>
+              </div>
+            </form>
+            <div class="attempts">
+              <span class="metric-label">Attempts left</span>
+              <div class="pips" id="loginPips"><span></span><span></span><span></span></div>
+            </div>
+            <div class="lock-box" id="lockBox" hidden>
+              <strong>Account locked</strong> · unlocks in <span id="lockSecs">15</span>s
+              <div class="progress danger"><div id="lockBar"></div></div>
+            </div>
+          </div>
+          <div class="card">
+            <h2 class="card-title">Demo accounts</h2>
+            <p class="small muted">Each password is stored only as PBKDF2-HMAC-SHA256 (<span id="loginIter">10,000</span> iterations) with a random 16-byte salt.</p>
+            <ul class="accounts" id="loginAccounts"></ul>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title-row">
+            <h2 class="card-title">Authentication log</h2>
+            <button class="btn ghost sm" id="loginClearLog">Clear</button>
+          </div>
+          <ol class="log" id="loginLog"><li class="muted">No attempts yet.</li></ol>
+        </div>
+        <div class="card info">
+          <h2 class="card-title">Lockouts vs. denial of service</h2>
+          <ul>
+            <li><strong>Why lock at all?</strong> Without limits, an online attacker can try thousands of guesses.</li>
+            <li><strong>The catch:</strong> an attacker can lock real users out on purpose by failing three times.</li>
+            <li><strong>Modern fixes:</strong> exponential backoff, CAPTCHA after a few failures, and risk-based checks on unfamiliar devices.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- ============================== 8. Analytics ============================== -->
+      <section class="page" id="page-analytics" data-title="Reports & Analytics" hidden>
+        <div class="page-head row">
+          <div>
+            <p class="eyebrow">Module 8</p>
+            <h1>Reports &amp; Analytics</h1>
+            <p class="lede">Session statistics, metadata only. No password is ever stored.</p>
+          </div>
+          <div class="btn-row">
+            <a class="btn primary" id="exportBtn" href="api/report" download>Export report</a>
+            <button class="btn ghost" id="resetStats">Reset session</button>
+          </div>
+        </div>
+        <div class="tiles" id="statTiles"></div>
+        <div class="grid-2">
+          <div class="card">
+            <h2 class="card-title">Strength distribution</h2>
+            <div class="bar-chart" id="strengthChart"></div>
+          </div>
+          <div class="card">
+            <h2 class="card-title">Simulation activity</h2>
+            <ul class="activity" id="activityList"></ul>
+          </div>
+        </div>
+        <div class="card">
+          <h2 class="card-title">Analysis history</h2>
+          <div class="table-wrap">
+            <table class="table" id="historyTable">
+              <thead><tr><th>Time</th><th>Score</th><th>Rating</th><th>Entropy</th><th>Crack time</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================== 9. Estimator ============================== -->
+      <section class="page" id="page-estimator" data-title="Crack-Time Estimator" hidden>
+        <div class="page-head">
+          <p class="eyebrow">Module 9</p>
+          <h1>Crack-Time Estimator</h1>
+          <p class="lede">Compare two passwords' theoretical search spaces and how long a full brute-force search would take at different guessing speeds.</p>
+        </div>
+        <div class="card">
+          <div class="form-grid">
+            <div>
+              <label class="label" for="estP1">Password 1</label>
+              <input id="estP1" type="text" value="summer99" autocomplete="off" spellcheck="false">
+            </div>
+            <div>
+              <label class="label" for="estP2">Password 2</label>
+              <input id="estP2" type="text" value="Summer#99!Peak" autocomplete="off" spellcheck="false">
+            </div>
+          </div>
+          <div class="chip-row">
+            <span class="small muted">Try:</span>
+            <button class="chip" data-p1="summer99" data-p2="Summer#99!Peak">Short vs. mixed</button>
+            <button class="chip" data-p1="482910" data-p2="correct-horse-battery-staple">PIN vs. passphrase</button>
+            <button class="chip" data-p1="Tr0ub4dor&amp;3" data-p2="trouble-dolphin-anchor-velvet">Complex vs. long</button>
+          </div>
+        </div>
+        <div class="insight" id="estInsight"></div>
+        <div class="grid-2" id="estSummary"></div>
+        <div class="card">
+          <h2 class="card-title">Time to search the full space</h2>
+          <div class="table-wrap">
+            <table class="table" id="estTable">
+              <thead><tr><th>Attacker speed</th><th>Password 1 <small>avg / worst</small></th><th>Password 2 <small>avg / worst</small></th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="card info">
+          <h2 class="card-title">Read these numbers with care</h2>
+          <ul>
+            <li><strong>Theoretical keyspace.</strong> This assumes every combination is tried. Length grows the space exponentially.</li>
+            <li><strong>Real attacks are often faster.</strong> Attackers try dictionary words, leaked passwords and patterns (capital first letter, year at the end) first.</li>
+            <li><strong>Hashing choice matters.</strong> Slow KDFs cut GPU speed from billions to around a thousand guesses per second.</li>
+          </ul>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+<div class="scrim" id="scrim" hidden></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<script src="js/app.js"></script>
+</body>
+</html>
