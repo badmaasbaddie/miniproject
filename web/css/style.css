@@ -460,6 +460,15 @@ input[type="range"] { width: 100%; accent-color: var(--accent); margin: 4px 0 8p
 .toast.bad { background: var(--bad); color: #fff; }
 @keyframes toast-in { from { opacity: 0; transform: translateY(8px); } }
 
+.boot-warning {
+  display: flex; flex-direction: column; gap: 4px;
+  margin-bottom: 18px; padding: 14px 18px; border-radius: var(--radius);
+  background: var(--bad-soft); color: var(--bad); border: 1px solid var(--bad);
+  font-size: 14px;
+}
+.boot-warning a { color: inherit; font-weight: 700; }
+.boot-warning code { background: transparent; color: inherit; font-weight: 700; }
+
 .scrim { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 40; }
 
 /* ------------------------------------------------------------------ responsive */

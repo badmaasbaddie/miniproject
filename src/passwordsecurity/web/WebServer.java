@@ -138,6 +138,7 @@ public final class WebServer {
             case "POST /login/reset":          sendJson(ex, 200, loginReset(p)); return;
             case "GET /estimate/rates":        sendJson(ex, 200, rates()); return;
             case "POST /estimate":             sendJson(ex, 200, estimate(p)); return;
+            case "GET /ping":                  sendJson(ex, 200, Json.obj("app", "password-security-suite")); return;
             case "GET /stats":                 sendJson(ex, 200, statsJson()); return;
             case "POST /stats/reset":          stats.resetAll(); sendJson(ex, 200, statsJson()); return;
             case "GET /report":                sendReport(ex); return;

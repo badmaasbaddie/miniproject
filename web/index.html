@@ -54,6 +54,12 @@
 
     <main class="content" id="content">
 
+      <!-- Shown until app.js confirms the Java server answers. If app.js is missing it stays visible. -->
+      <div class="boot-warning" id="bootWarning" role="alert">
+        <strong>The features are not connected yet.</strong>
+        <span id="bootWarningText">The page's script (web/js/app.js) did not load. Make sure that file exists, then start the app by double-clicking <code>run.bat</code> and use the address it opens: <a href="http://localhost:8080/">http://localhost:8080/</a>. Opening index.html directly does not work.</span>
+      </div>
+
       <!-- ============================== Home ============================== -->
       <section class="page" id="page-home" data-title="Home">
         <div class="hero">

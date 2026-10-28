@@ -292,6 +292,9 @@ public class TestSuite {
         try {
             String home = http("GET", base + "/", null);
             check("Web: index page is served", home.contains("<title>"));
+            check("Web: front-end script app.js is present", status(base + "/js/app.js") == 200);
+            check("Web: /api/ping identifies the backend",
+                    http("GET", base + "/api/ping", null).contains("password-security-suite"));
             check("Web: path traversal is blocked", status(base + "/../src/passwordsecurity/Main.java") == 404);
 
             String analyze = http("POST", base + "/api/analyze", "password=" + enc("Vx7#qLm!2zR$wK9p") + "&record=1");

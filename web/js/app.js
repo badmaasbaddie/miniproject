@@ -822,5 +822,24 @@
     onShow.estimator = update;
   })();
 
+  // ------------------------------------------------------------------ backend check
+  // The page only works when served by the Java server (run.bat), not when opened as a file.
+  async function checkBackend() {
+    const box = $('#bootWarning');
+    const text = $('#bootWarningText');
+    const link = '<a href="http://localhost:8080/">http://localhost:8080/</a>';
+    if (location.protocol === 'file:') {
+      text.innerHTML = 'You opened index.html directly as a file, so the Java backend cannot be reached. Double-click <code>run.bat</code> and use the address it opens: ' + link + '.';
+      return;
+    }
+    try {
+      const res = await fetch('api/ping', { cache: 'no-store' });
+      const data = await res.json();
+      if (data.app === 'password-security-suite') { box.hidden = true; return; }
+    } catch (e) { /* fall through */ }
+    text.innerHTML = 'This page is not being served by the Java server (or the server stopped). Close this tab, double-click <code>run.bat</code>, keep its window open, and use ' + link + '. Do not use VS Code Live Server or open the HTML file directly.';
+  }
+
+  checkBackend();
   route();
 })();
