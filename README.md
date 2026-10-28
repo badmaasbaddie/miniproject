@@ -51,7 +51,7 @@ Options: `--port 9090` to use another port (if 8080 is busy the app tries the ne
 |---|--------|-----------------|
 | 1 | **Password Strength Analyzer** | Live score (0-100), Weak/Medium/Strong rating, entropy (`E = L × log2(R)`), character checklist, crack-time estimate, and weak-pattern warnings (common words, `123`/`abc` runs, `aaa` repeats, short length). **Analyze & record** adds the score (never the password) to the session report. |
 | 2 | **Secure Password Generator** | Random passwords (6-64 chars, choose character sets, exclude look-alikes `0 O l I 1`) and memorable passphrases (3-8 words, separator, capitalisation, trailing number). Uses `java.security.SecureRandom`. Shows entropy, copy-to-clipboard, and "Analyze it". |
-| 3 | **Brute Force Simulator** | Enumerates every combination of the target's length over the chosen character pool until it hits the target. Shows pool size, `R^L`, attempts, and real server time. Capped at 500,000 attempts (50,000 for targets over 4 characters). |
+| 3 | **Brute Force Simulator** | Type any target (up to 12 characters); the matching character sets are ticked automatically. Java guesses every combination of that length in order (aaa, aab, …) at full speed, roughly 50-300 million guesses per second, for up to 4 seconds. Shows pool size, `R^L`, attempts, time, measured speed, and how long a full search would take. Words up to about 6 lowercase letters are cracked; longer ones run out of time, which is the lesson. |
 | 4 | **Dictionary Attack Simulator** | Walks the local wordlist `data/sample_words.txt` looking for the target, with animated/fast/instant speeds. Add your own words or restore the original list. |
 | 5 | **Password Hashing Lab** | Compute SHA-256 of any text, plus three demos: **determinism**, the **avalanche effect** (shows exactly how many of the 256 bits flip), and **salting** (same password, different stored hashes). |
 | 6 | **Hash Matching Demo** | Pick a "leaked" SHA-256 hash (or paste one) and watch candidate words get hashed and compared until one matches. Shows that hashes are guessed, not reversed. |
@@ -104,7 +104,7 @@ The site also has a home dashboard, dark/light mode, and a layout that works on 
 mini project/
 ├── src/passwordsecurity/
 │   ├── Main.java                  # Starts the web server and opens the browser
-│   ├── TestSuite.java             # 78 automated tests (core logic + HTTP API)
+│   ├── TestSuite.java             # 83 automated tests (core logic + HTTP API)
 │   ├── core/
 │   │   ├── PasswordAnalyzer.java  # Module 1: scoring, entropy, pattern checks
 │   │   ├── PasswordGenerator.java # Module 2: SecureRandom passwords & passphrases
@@ -136,11 +136,11 @@ mini project/
 ```bash
 java -cp bin passwordsecurity.TestSuite
 ```
-(or double-click `test.bat`). The suite runs **78 checks** against the real production classes, then starts the web server on a random port and calls the API end to end:
+(or double-click `test.bat`). The suite runs **83 checks** against the real production classes, then starts the web server on a random port and calls the API end to end:
 
 - **Analyzer:** empty/short input, character classes, pool size, entropy, sequential and repeated patterns, common words
 - **Generator:** length, every selected class present, randomness, exclude-ambiguous, invalid settings rejected, passphrase format and vocabulary
-- **Brute force:** finds `429` at attempt #430, `R^L` maths, attempt cap, out-of-pool characters rejected
+- **Brute force:** finds `429` at attempt #430, `R^L` maths, cracks a 5-letter word, stops at the attempt ceiling and at the time limit, out-of-pool characters rejected
 - **Dictionary / hash matching:** found index, full-scan miss, case sensitivity, malformed hash rejected
 - **Hashing:** SHA-256 known test vector, determinism, avalanche bit difference, salting
 - **Login:** PBKDF2 determinism, lockout after exactly 3 failures, blocked while locked, cooldown expiry (simulated clock), emergency reset, success clears the counter

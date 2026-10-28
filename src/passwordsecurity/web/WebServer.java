@@ -187,14 +187,16 @@ public final class WebServer {
         int len = p.getOrDefault("target", "").length();
         BigInteger combos = SecurityMath.combinations(pool.length(), len);
         return Json.obj("poolSize", pool.length(), "combinations", SecurityMath.formatBig(combos),
-                "estimate", SecurityMath.formatDuration(combos, BigInteger.valueOf(10_000_000L)));
+                "estimate", SecurityMath.formatDuration(combos, BigInteger.valueOf(100_000_000L)));
     }
 
     private Map<String, Object> bruteForceRun(Map<String, String> p) {
         AttackSimulations.BruteForceResult r = AttackSimulations.bruteForce(p.getOrDefault("target", ""), bfPool(p));
         stats.recordBruteForceSimulation();
         return Json.obj("found", r.found, "capped", r.capped, "attempts", r.attempts,
-                "maxAttempts", r.maxAttempts, "elapsedMs", r.elapsedNanos / 1_000_000.0,
+                "elapsedMs", r.elapsedNanos / 1_000_000.0,
+                "timeLimitSeconds", AttackSimulations.TIME_LIMIT_MS / 1000,
+                "attemptsPerSecond", r.attemptsPerSecond, "projectedFullSearch", r.projectedFullSearch,
                 "totalCombinations", SecurityMath.formatBig(r.totalCombinations),
                 "totalCombinationsRaw", r.totalCombinations.toString(), "samples", r.samples);
     }

@@ -278,7 +278,16 @@
       $('#bfSymbols').checked = false;
       updateSpace();
     });
-    target.addEventListener('input', () => { $('#bfPreset').value = ''; updateSpace(); });
+    /** Tick exactly the character sets the typed target needs. */
+    function autoPool() {
+      const t = target.value;
+      if (!t) return;
+      $('#bfDigits').checked = /[0-9]/.test(t);
+      $('#bfLower').checked = /[a-z]/.test(t);
+      $('#bfUpper').checked = /[A-Z]/.test(t);
+      $('#bfSymbols').checked = /[^0-9a-zA-Z]/.test(t);
+    }
+    target.addEventListener('input', () => { $('#bfPreset').value = ''; autoPool(); updateSpace(); });
     $$('#page-bruteforce .checks input').forEach((c) => c.addEventListener('change', updateSpace));
 
     function setRunning(on) {
@@ -297,16 +306,26 @@
       $('#bfBar').parentElement.classList.remove('done');
       $('#bfAttempts').textContent = '0';
       $('#bfElapsed').textContent = '0 ms';
+      $('#bfSpeed').textContent = '—';
       $('#bfStatus').textContent = 'Ready';
+      $('#bfVerdict').hidden = true;
+    }
+
+    function verdict(text, kind) {
+      const v = $('#bfVerdict');
+      v.textContent = text;
+      v.className = 'status-banner ' + kind;
+      v.hidden = false;
     }
 
     $('#bfRun').addEventListener('click', () => guard(async () => {
       const t = target.value;
-      if (t.length > 5 && !confirm('This target is ' + t.length + ' characters. The demo will stop after 50,000 attempts, long before it finishes. Run it anyway?')) return;
+      if (!t) { toast('Type a target first.'); target.focus(); return; }
       reset();
       const id = runId;
       setRunning(true);
-      $('#bfStatus').textContent = 'Running…';
+      $('#bfStatus').textContent = 'Guessing… (up to 4 s)';
+      $('#bfCandidate').textContent = 'working…';
       let r;
       try {
         r = await api('bruteforce/run', Object.assign({ target: t }, pool()));
@@ -316,21 +335,27 @@
         throw e;
       }
       // Replay evenly spaced snapshots so the search is visible.
+      // Driven by the clock, not by counting frames, so it always takes ~1.5 s
+      // even if the browser slows timers down (e.g. in a background tab).
       const total = Number(r.totalCombinationsRaw);
       const n = r.samples.length;
-      const frame = Math.max(8, Math.min(25, 1800 / Math.max(n, 1)));
-      for (let i = 0; i < n; i++) {
+      const duration = n ? 1500 : 0;
+      const started = performance.now();
+      while (true) {
         if (id !== runId) return;
+        const i = Math.floor(((performance.now() - started) / duration) * n);
+        if (!(i < n)) break;
         const attempts = Math.round((r.attempts * (i + 1)) / (n + 1));
         $('#bfCandidate').textContent = r.samples[i];
         $('#bfAttempts').textContent = fmtInt(attempts);
-        $('#bfBar').style.width = Math.min(100, (attempts / Math.min(total, r.maxAttempts)) * 100) + '%';
-        await sleep(frame);
+        $('#bfBar').style.width = Math.min(100, (attempts / total) * 100) + '%';
+        await sleep(30);
       }
       if (id !== runId) return;
       setRunning(false);
       $('#bfAttempts').textContent = fmtInt(r.attempts);
-      $('#bfElapsed').textContent = r.elapsedMs < 1 ? '< 1 ms' : r.elapsedMs.toFixed(1) + ' ms';
+      $('#bfElapsed').textContent = r.elapsedMs < 1 ? '< 1 ms' : r.elapsedMs < 1000 ? r.elapsedMs.toFixed(1) + ' ms' : (r.elapsedMs / 1000).toFixed(2) + ' s';
+      $('#bfSpeed').textContent = fmtInt(r.attemptsPerSecond) + '/s';
       const cand = $('#bfCandidate');
       if (r.found) {
         cand.textContent = 'Found: ' + t;
@@ -338,12 +363,16 @@
         $('#bfBar').style.width = '100%';
         $('#bfBar').parentElement.classList.add('done');
         $('#bfStatus').textContent = 'Cracked';
-        toast('Found "' + t + '" after ' + fmtInt(r.attempts) + ' attempts.', 'good');
+        verdict('Cracked "' + t + '" on guess #' + fmtInt(r.attempts) + ' out of ' + r.totalCombinations
+          + ' possible combinations. At this speed, trying every combination would take ' + r.projectedFullSearch + '.', 'good');
       } else {
-        cand.textContent = 'Stopped at cap';
+        cand.textContent = 'Gave up';
         cand.className = 'candidate miss';
-        $('#bfStatus').textContent = 'Capped';
-        toast('Stopped after ' + fmtInt(r.maxAttempts) + ' of ' + r.totalCombinations + ' combinations. Length makes brute force impractical.');
+        $('#bfBar').style.width = Math.max(0.5, Math.min(100, (r.attempts / total) * 100)) + '%';
+        $('#bfStatus').textContent = 'Not cracked';
+        verdict('Gave up after ' + r.timeLimitSeconds + ' seconds and ' + fmtInt(r.attempts) + ' guesses, only a tiny part of the '
+          + r.totalCombinations + ' combinations. At this speed, trying them all would take ' + r.projectedFullSearch
+          + '. That is why long passwords resist brute force.', 'bad');
       }
     }));
     $('#bfStop').addEventListener('click', () => {
@@ -352,6 +381,7 @@
       $('#bfStatus').textContent = 'Stopped';
     });
     $('#bfReset').addEventListener('click', reset);
+    autoPool();
     updateSpace();
   })();
 

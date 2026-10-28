@@ -143,9 +143,18 @@ public class TestSuite {
         check("Brute force finds 'cat' in lowercase pool", cat.found);
         check("Search space for 3 lowercase chars is 17,576", cat.totalCombinations.equals(BigInteger.valueOf(17_576)));
 
-        AttackSimulations.BruteForceResult capped = AttackSimulations.bruteForce("zzzzzz", AttackSimulations.BF_LOWER);
-        check("Long target is capped at 50,000 attempts", !capped.found && capped.capped && capped.attempts == 50_000);
+        AttackSimulations.BruteForceResult five = AttackSimulations.bruteForce("hello", AttackSimulations.BF_LOWER);
+        check("5-letter word 'hello' is found (no 50k cap any more)", five.found && five.attempts > 50_000);
+        check("Brute force reports a measured speed and projected full-search time",
+                five.attemptsPerSecond > 0 && five.projectedFullSearch != null);
 
+        AttackSimulations.BruteForceResult capped = AttackSimulations.bruteForce("zzzzzz", AttackSimulations.BF_LOWER, 4_000, 100_000);
+        check("Search stops at the attempt ceiling", !capped.found && capped.capped && capped.attempts == 100_000);
+
+        long t0 = System.currentTimeMillis();
+        AttackSimulations.BruteForceResult timed = AttackSimulations.bruteForce("zzzzzzzzz", AttackSimulations.BF_LOWER, 300, Long.MAX_VALUE);
+        long took = System.currentTimeMillis() - t0;
+        check("Search gives up when the time limit runs out", !timed.found && timed.capped && took < 2_000);
         check("Target character outside pool is rejected",
                 throwsIAE(() -> AttackSimulations.bruteForce("ab1", AttackSimulations.BF_LOWER)));
     }

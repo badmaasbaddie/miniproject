@@ -2,6 +2,7 @@ package passwordsecurity.core;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -15,9 +16,12 @@ public final class AttackSimulations {
     public static final String BF_UPPER = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
     public static final String BF_SYMBOLS = "!@#$%^&*";
 
-    /** Attempt caps keep the demo responsive: longer targets get a tighter cap. */
-    public static final long CAP_SHORT = 500_000, CAP_LONG = 50_000;
+    /** The search gives up after this long, so the page never freezes on a long target. */
+    public static final long TIME_LIMIT_MS = 4_000;
+    /** Hard ceiling on guesses, as a second safety net. */
+    public static final long MAX_ATTEMPTS = 2_000_000_000L;
     public static final int MAX_BRUTE_FORCE_LENGTH = 12;
+    private static final int MAX_SAMPLES = 150;
 
     private AttackSimulations() {}
 
@@ -29,20 +33,28 @@ public final class AttackSimulations {
 
     public static final class BruteForceResult {
         public boolean found;
+        /** True when the search gave up (time limit or attempt ceiling) before finding the target. */
         public boolean capped;
         public long attempts;
-        public long maxAttempts;
         public long elapsedNanos;
         public BigInteger totalCombinations;
+        /** Guesses per second this computer actually achieved. */
+        public long attemptsPerSecond;
+        /** How long trying every combination would take at that measured speed. */
+        public String projectedFullSearch;
         /** Evenly spaced snapshots of candidates tried, for the browser to animate. */
         public final List<String> samples = new ArrayList<>();
     }
 
+    public static BruteForceResult bruteForce(String target, String pool) {
+        return bruteForce(target, pool, TIME_LIMIT_MS, MAX_ATTEMPTS);
+    }
+
     /**
      * Enumerates every string of the target's length over {@code pool}, in order,
-     * until it matches or hits the attempt cap.
+     * until it matches, runs out of time, or reaches {@code maxAttempts}.
      */
-    public static BruteForceResult bruteForce(String target, String pool) {
+    public static BruteForceResult bruteForce(String target, String pool, long timeLimitMs, long maxAttempts) {
         if (target.isEmpty()) throw new IllegalArgumentException("Enter a target string for the simulation.");
         if (pool.isEmpty()) throw new IllegalArgumentException("Select at least one character set.");
         if (target.length() > MAX_BRUTE_FORCE_LENGTH) {
@@ -57,24 +69,30 @@ public final class AttackSimulations {
         BruteForceResult r = new BruteForceResult();
         int len = target.length();
         r.totalCombinations = SecurityMath.combinations(pool.length(), len);
-        r.maxAttempts = len > 4 ? CAP_LONG : CAP_SHORT;
-        long expected = r.totalCombinations.min(BigInteger.valueOf(r.maxAttempts)).longValue();
+        // How many guesses we expect to make: the whole keyspace, or as far as the limit allows.
+        long expected = r.totalCombinations.min(BigInteger.valueOf(Math.min(maxAttempts, 50_000_000L))).longValue();
         long sampleEvery = Math.max(1, expected / 120);
 
+        char[] goal = target.toCharArray();
         int[] idx = new int[len];
         char[] cur = new char[len];
         for (int i = 0; i < len; i++) cur[i] = pool.charAt(0);
 
         long start = System.nanoTime();
+        long deadline = start + timeLimitMs * 1_000_000L;
         while (true) {
             r.attempts++;
-            String candidate = new String(cur);
-            if (candidate.equals(target)) {
+            if (Arrays.equals(cur, goal)) {
                 r.found = true;
                 break;
             }
-            if (r.attempts % sampleEvery == 0) r.samples.add(candidate);
-            if (r.attempts >= r.maxAttempts) {
+            if (r.attempts % sampleEvery == 0) r.samples.add(new String(cur));
+            if (r.attempts >= maxAttempts) {
+                r.capped = true;
+                break;
+            }
+            // Checking the clock is slow, so only do it every 65,536 guesses.
+            if ((r.attempts & 0xFFFF) == 0 && System.nanoTime() > deadline) {
                 r.capped = true;
                 break;
             }
@@ -93,6 +111,19 @@ public final class AttackSimulations {
             if (p < 0) break; // exhausted (cannot happen when target is in pool)
         }
         r.elapsedNanos = System.nanoTime() - start;
+
+        // Thin the snapshots out to at most MAX_SAMPLES for the animation.
+        if (r.samples.size() > MAX_SAMPLES) {
+            List<String> thinned = new ArrayList<>();
+            double step = (double) r.samples.size() / MAX_SAMPLES;
+            for (int i = 0; i < MAX_SAMPLES; i++) thinned.add(r.samples.get((int) (i * step)));
+            r.samples.clear();
+            r.samples.addAll(thinned);
+        }
+
+        double seconds = Math.max(r.elapsedNanos, 1) / 1e9;
+        r.attemptsPerSecond = Math.max(1, (long) (r.attempts / seconds));
+        r.projectedFullSearch = SecurityMath.formatDuration(r.totalCombinations, BigInteger.valueOf(r.attemptsPerSecond));
         return r;
     }
 

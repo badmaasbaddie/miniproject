@@ -192,21 +192,24 @@
         <div class="page-head">
           <p class="eyebrow">Module 3</p>
           <h1>Brute Force Simulator</h1>
-          <p class="lede">Tries every combination of the target's length, in order, against a sample string you type. Short targets fall in milliseconds; each extra character multiplies the work.</p>
+          <p class="lede">Type <strong>any</strong> word or password as the secret target. The simulator then guesses every combination of that length, in order (aaa, aab, aac…), until it hits your target. It runs at full speed for up to 4 seconds. Short targets fall instantly; each extra character multiplies the work.</p>
         </div>
         <div class="grid-2">
           <div class="card">
             <h2 class="card-title">Setup</h2>
             <label class="label" for="bfPreset">Quick preset</label>
             <select id="bfPreset">
-              <option value="">Custom…</option>
-              <option value="429|d">3 digits: 429</option>
+              <option value="">Custom (type your own below)</option>
+              <option value="4291|d">4-digit PIN: 4291</option>
               <option value="cat|l">3 lowercase: cat</option>
-              <option value="A9z|dlu">3 alphanumeric: A9z</option>
-              <option value="code|l">4 lowercase: code</option>
+              <option value="hello|l">5 lowercase: hello</option>
+              <option value="secret|l">6 lowercase: secret</option>
+              <option value="Pa55|dlu">4 mixed: Pa55</option>
+              <option value="dolphin|l">7 lowercase: dolphin (too long to finish)</option>
             </select>
-            <label class="label" for="bfTarget">Target string</label>
-            <input id="bfTarget" type="text" value="cat" autocomplete="off" spellcheck="false" maxlength="12">
+            <label class="label" for="bfTarget">Target string (type anything, up to 12 characters)</label>
+            <input id="bfTarget" type="text" value="hello" autocomplete="off" spellcheck="false" maxlength="12">
+            <p class="small muted">The character sets below are ticked automatically to match what you type. You can tick extra sets to see how a bigger pool slows the attack.</p>
             <div class="checks">
               <label class="check"><input type="checkbox" id="bfDigits"> Digits</label>
               <label class="check"><input type="checkbox" id="bfLower" checked> Lowercase</label>
@@ -216,7 +219,7 @@
             <dl class="kv compact">
               <dt>Pool size (R)</dt><dd id="bfPool">26</dd>
               <dt>Combinations (R<sup>L</sup>)</dt><dd id="bfCombos">17,576</dd>
-              <dt>Full search at 10M/s</dt><dd id="bfEst">—</dd>
+              <dt>Full search at 100M guesses/s</dt><dd id="bfEst">—</dd>
             </dl>
           </div>
           <div class="card monitor">
@@ -225,15 +228,17 @@
             <div class="progress"><div id="bfBar"></div></div>
             <div class="metrics">
               <div><span class="metric-label">Attempts</span><span class="metric" id="bfAttempts">0</span></div>
-              <div><span class="metric-label">Time (server)</span><span class="metric" id="bfElapsed">0 ms</span></div>
+              <div><span class="metric-label">Time taken</span><span class="metric" id="bfElapsed">0 ms</span></div>
+              <div><span class="metric-label">Speed</span><span class="metric" id="bfSpeed">—</span></div>
               <div><span class="metric-label">Status</span><span class="metric" id="bfStatus">Ready</span></div>
             </div>
+            <div class="status-banner" id="bfVerdict" hidden></div>
             <div class="btn-row">
               <button class="btn primary" id="bfRun">Run simulation</button>
               <button class="btn danger" id="bfStop" disabled>Stop</button>
               <button class="btn ghost" id="bfReset">Reset</button>
             </div>
-            <p class="small muted">Capped at 500,000 attempts (50,000 for targets over 4 characters) to keep the demo quick.</p>
+            <p class="small muted">The real search runs in Java on your computer, then the page replays snapshots of it so you can watch. It gives up after 4 seconds so the page never freezes.</p>
           </div>
         </div>
         <div class="card info">
